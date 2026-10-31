@@ -1,4 +1,4 @@
-from flask import Flask, make_response
+from flask import Flask, make_response, request
 data = [
     {
         "id": "3b58aade-8415-49dd-88db-8d7bce14932a",
@@ -73,3 +73,18 @@ def get_data():
         # Return a JSON response with a 404 Not Found status code
         return {"message": "Data not found"}, 404
  
+@app.route("/name_search")
+def name_search():
+    query = request.args.get("q")
+
+    if query is None:
+        return {"message": "Invalid input parameter"}, 400
+
+    if query.strip() == "" or query.isdigit():
+        return {"message": "Invalid input parameter"}, 422
+
+    for person in data:
+        if query.lower() in person["first_name"].lower():
+            return person, 200
+
+    return {"message": "Person not found"}, 404
