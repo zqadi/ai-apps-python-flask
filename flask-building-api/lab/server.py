@@ -1,4 +1,5 @@
 from flask import Flask, make_response, request
+
 data = [
     {
         "id": "3b58aade-8415-49dd-88db-8d7bce14932a",
@@ -54,25 +55,23 @@ data = [
         "zip": "80305",
         "country": "United States",
         "avatar": "http://dummyimage.com/198x100.png/cc0000/ffffff",
-    }
+    },
 ]
 
 app = Flask(__name__)
+
+
 @app.route("/data")
 def get_data():
     try:
-        # Check if 'data' exists and has a length greater than 0
         if data and len(data) > 0:
-            # Return a JSON response with a message indicating the length of the data
             return {"message": f"Data of length {len(data)} found"}
         else:
-            # If 'data' is empty, return a JSON response with a 500 Internal Server Error status code
             return {"message": "Data is empty"}, 500
     except NameError:
-        # Handle the case where 'data' is not defined
-        # Return a JSON response with a 404 Not Found status code
         return {"message": "Data not found"}, 404
- 
+
+
 @app.route("/name_search")
 def name_search():
     query = request.args.get("q")
@@ -88,3 +87,28 @@ def name_search():
             return person, 200
 
     return {"message": "Person not found"}, 404
+
+
+@app.route("/count")
+def count():
+    try:
+        return {"data count": len(data)}, 200
+    except NameError:
+        return {"message": "data not defined"}, 500
+
+
+@app.route("/person/<uuid:id>")
+def find_by_uuid(id):
+    for person in data:
+        if person["id"] == str(id):
+            return person
+    return {"message": "person not found"}, 404
+
+
+@app.route("/person/<uuid:id>", methods=["DELETE"])
+def delete_by_uuid(id):
+    for person in data:
+        if person["id"] == str(id):
+            data.remove(person)
+            return {"message": f"Person with ID {id} deleted"}, 200
+    return {"message": "person not found"}, 404
